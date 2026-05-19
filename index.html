@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edukacyjny Atlas Zapylaczy - 20 Fiszek</title>
+    <style>
+        :root {
+            --primary: #d97706; /* Ciepły odcień miodowy */
+            --bg: #fef3c7; /* Delikatne żółte tło */
+            --card: #ffffff;
+            --text: #78350f;
+            --success: #16a34a;
+            --error: #dc2626;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background: var(--card);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(120, 53, 15, 0.05);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        .hidden { display: none !important; }
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 15px;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.9; }
+        
+        .image-container {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+        .main-img {
+            max-width: 100%;
+            max-height: 260px;
+            border: 3px solid #fde68a;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            object-fit: cover;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .option-tile {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .option-tile:hover {
+            border-color: var(--primary);
+            background-color: #fef9c3;
+        }
+        .option-tile.correct {
+            background-color: #dcfce7 !important;
+            border-color: var(--success) !important;
+            color: #166534 !important;
+        }
+        .option-tile.wrong {
+            background-color: #fee2e2 !important;
+            border-color: var(--error) !important;
+            color: #991b1b !important;
+        }
+        .option-tile.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .fiszka-box {
+            background-color: #fef9c3;
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            text-align: left;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+        }
+        .progress-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #92400e;
+        }
+        .progress-bar {
+            flex-grow: 1;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Ekran startowy -->
+    <div id="start-screen">
+        <h1>🐝 Skrzydlaci Sprzymierzeńcy</h1>
+        <p>Poznaj sekrety 20 owadów zapylających polskie sady i ogrody. Sprawdź swoją wiedzę i odkryj fascynujące fiszki przyrodnicze.</p>
+        <button class="btn" onclick="startLearning()">Rozpocznij naukę</button>
+    </div>
+
+    <!-- Ekran nauki -->
+    <div id="learning-screen" class="hidden">
+        <div class="progress-container">
+            <span id="progress-text">Owada 1 z 20</span>
+            <div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
+        </div>
+        <h2 id="question-title">Wybierz poprawną odpowiedź:</h2>
+        
+        <div class="image-container">
+            <img id="main-image" src="" alt="Owad zapylający" class="main-img">
+        </div>
+
+        <div id="options-grid" class="options-grid"></div>
+        
+        <!-- Fiszka podsumowująca -->
+        <div id="fiszka" class="fiszka-box hidden"></div>
+        
+        <button class="btn hidden" id="next-btn" onclick="nextQuestion()">Następne zagadnienie ➔</button>
+    </div>
+
+    <!-- Ekran zakończenia -->
+    <div id="end-screen" class="hidden">
+        <h2>🎉 Gratulacje! Cała wiedza została opanowana!</h2>
+        <p>Poznałaś rolę 20 niesamowitych zapylaczy w naszym ekosystemie. Twój wynik poprawnych odpowiedzi za pierwszym podejściem:</p>
+        <div style="font-size: 3rem; font-weight: bold; color: var(--primary); margin: 20px 0;" id="final-score">0 / 20</div>
+        <button class="btn" onclick="location.reload()">Powtórz kurs</button>
+    </div>
+</div>
+
+<script>
+// Baza 20 pytań i fiszek edukacyjnych na temat owadów zapylających
+const insectDatabase = [
+    {
+        image: "https://unsplash.com",
+        q: "Który owad potrafi zapylać kwiaty w niskich temperaturach (od 10°C), działając w sadach wczesną wiosną?",
+        options: ["Pszczoła miodna", "Trzmiel ziemny", "Bzyg", "Złotook"],
+        correct: 1,
+        info: "<b>💡 FISZKA #1 - Trzmiele (Bombus):</b> Posiadają gęste futro i potrafią rozgrzać swoje mięśnie za pomocą drżeń. Dzięki temu latają przy złej, chłodnej pogodzie wczesną wiosną, gdy pszczoły miodne nie opuszczają jeszcze uli."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Która dzika pszczoła samotnica nie posiada żądła, nie wykazuje agresji i idealnie nadaje się do przydomowych domków z trzciny?",
+        options: ["Murarka ogrodowa", "Pszczoła miodna", "Osa dachowa", "Szerszeń"],
+        correct: 0,
+        info: "<b>💡 FISZKA #2 - Murarka ogrodowa (Osmia rufa):</b> Żyje samotnie i nie broni gniazda roju, dzięki czemu nie użądli człowieka. Jest wybitnie wydajnym zapylaczem – jedna murarka odwiedza tysiące kwiatów drzew owocowych dziennie."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Który pożyteczny owad upodabnia się ubarwieniem do osy, żywi się nektarem, a jego larwy zjadają kolonie mszyc?",
+        options: ["Biedronka", "Złotook", "Bzyg prążkowany", "Szubarg"],
+        correct: 2,
+        info: "<b>💡 FISZKA #3 - Bzygowate (Syrphidae):</b> Wyglądają jak osy, by odstraszyć drapieżniki, ale są całkowicie niegroźne (to muchówki). Dorośli zapylają uprawy, a ich beznogie larwy są żarłocznymi sprzymierzeńcami w walce z mszycami."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Który owad nocny (ćma) potrafi zawisnąć w powietrzu jak koliber i spijać nektar z wąskich kielichów kwiatowych?",
+        options: ["Fruczak gołąbek", "Niedźwiedzkówka", "Zmierzchnica trupia głowa", "Molik"],
+        correct: 0,
+        info: "<b>💡 FISZKA #4 - Fruczak gołąbek (Macroglossum stellatarum):</b> To motyl nocny latający również w dzień. Posiada niezwykle długą ssawkę, którą precyzyjnie operuje, zapylając rośliny o głębokich i wąskich kielichach."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Które działanie w przydomowym ogrodzie najbardziej pomaga chronić dzikie owady zapylające?",
+        options: ["Częste koszenie i usuwanie chwastów", "Stosowanie silnych oprysków", "Sianie łąk kwietnych i budowanie hoteli", "Grabienie opadłych liści"],
+        correct: 2,
+        info: "<b>💡 FISZKA #5 - Architektura ogrodowa przyjazna naturze:</b> Łąki kwietne zapewniają stały dostęp do pokarmu (nektar i pyłek) od wiosny do jesieni, a hotele z nawierconego drewna lub trzciny dają dzikim pszczołom bezpieczne miejsce do rozmnażania."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Jak nazywa się jedna z największych dzikich pszczół w Polsce, o pięknym czarno-fioletowym ciele, która drąży korytarze w starym drewnie?",
+        options: ["Zadrzechnia fioletowa", "Trzmiel kamiennik", "Pszczolinka", "Miodarka"],
+        correct: 0,
+        info: "<b>💡 FISZKA #6 - Zadrzechnia fioletowa (Xylocopa violacea):</b> Nazywana bywa czarną pszczołą. Przez lata uważana za wymarłą, powróciła do Polski. Zakłada gniazda w suchym, próchniejącym drewnie i jest pod ścisłą ochroną."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Która popularna grupa motyli dziennych o jaskrawych barwach bierze aktywny udział w zapylaniu, choć jest mniej wydajna od pszczół?",
+        options: ["Rusałkowate (np. Rusałka pawik)", "Bielinkowate", "Mokradłowe", "Kraśnikowate"],
+        correct: 0,
+        info: "<b>💡 FISZKA #7 - Rusałka pawik (Aglais io):</b> Motyle dzienne przenoszą pyłek głównie na swoich długich odnóżach i ssawce. Choć nie zbierają pyłku masowo jak pszczoły, pełnią ważną rolę w zapylaniu roślin dziko rosnących."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Który mały, pożyteczny drapieżnik o zielonym ciele i przezroczystych skrzydełkach żywi się nektarem jako dorosły, a jako larwa niszczy szkodniki?",
+        options: ["Złotook ogólny", "Modliszka", "Ważka ważkowata", "Komar tygrysi"],
+        correct: 0,
+        info: "<b>💡 FISZKA #8 - Złotook (Chrysopidae):</b> Dorosłe osobniki chętnie spijają nektar, wspomagając zapylanie. Ich obecność w ogrodzie jest kluczowa, gdyż ich larwy potrafią zjeść do kilkuset mszyc w ciągu swojego rozwoju."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Jakie dzikie pszczoły kopią małe norki w piaszczystej ziemi, tworząc podziemne gniazda dla swojego potomstwa?",
+        options: ["Pszczolinki (np. piaskowa)", "Murarki", "Klecaniki", "Porobnice"],
+        correct: 0,
+        info: "<b>💡 FISZKA #9 - Pszczolinka piaskowa (Andrena cineraria):</b> Prawie 70% gatunków dzikich pszczół w Polsce gniazduje w ziemi. Pszczolinki potrzebują odsłoniętych fragmentów piaszczystego gruntu w ogrodzie, by wykopć norki."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Co oznacza pojęcie 'zapylanie wibracyjne' (buzz pollination), stosowane wybitnie przez trzmiele?",
+        options: ["Taniec na kwiatku", "Wprawianie kwiatu w drgania mięśniami lotnymi", "Dmuchanie na pyłek", "Latanie tyłem"],
+        correct: 1,
+        info: "<b>💡 FISZKA #10 - Zapylanie wibracyjne:</b> Rośliny takie jak pomidory czy borówki trzymają pyłek mocno wewnątrz pylników. Trzmiel łapie kwiat i wibruje ciałem z ogromną częstotliwością, powodując wysypanie się pyłku."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Które małe, metalicznie zielone lub błyszczące chrząszcze często spotykamy na kwiatach, gdzie jedząc pyłek, przypadkowo go przenoszą?",
+        options: ["Kruszczyca złotawka", "Biedronka siedmiokropka", "Chrabąszcz majowy", "Stonka"],
+        correct: 0,
+        info: "<b>💡 FISZKA #11 - Kruszczyca złotawka (Cetonia aurata):</b> Chrząszcze były jednymi z pierwszych zapylaczy w historii Ziemi. Choć czasami lekko uszkadzają kwiaty, ich gęsto owłosione spody ciał skutecznie przenoszą pyłek."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Dlaczego opryski chemiczne przeciw szkodnikom należy wykonywać wyłącznie wieczorem, po zachodzie słońca?",
+        options: ["Bo chemia działa lepiej w nocy", "Aby nie zatruć pszczół i innych zapylaczy", "Bo słońce niszczy oprysk", "Ze względu na rosę"],
+        correct: 1,
+        info: "<b>💡 FISZKA #12 - Bezpieczeństwo chemiczne:</b> Wieczorem owady zapylające kończą loty i wracają do gniazd. Wykonanie oprysku w nocy daje preparatowi czas na wyschnięcie, co drastycznie zmniejsza ryzyko masowego zatrucia pszczół."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Który duży, owłosiony trzmiel o czarnym ciele i jaskrawoczerwonym odwłoku buduje gniazda pod kamieniami lub w szczelinach murów?",
+        options: ["Trzmiel kamiennik", "Trzmiel ziemny", "Trzmiel leśny", "Trzmiel rudy"],
+        correct: 0,
+        info: "<b>💡 FISZKA #13 - Trzmiel kamiennik (Bombus lapidarius):</b> To charakterystyczny i bardzo pożyteczny gatunek. Chętnie zasiedla ogrody przydomowe, latając wytrwale od świtu do zmierzchu w poszukiwaniu nektaru."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Jaką funkcję pełni nektar produkowany przez kwiaty roślin ogrodowych?",
+        options: ["Chroni przed mrozem", "Wabi owady słodkim roztworem cukrów", "Służy do fotosyntezy", "Oczyszcza powietrze"],
+        correct: 1,
+        info: "<b>💡 FISZKA #14 - Strategia ewolucyjna:</b> Nektar to czysta 'zapłata' oferowana przez roślinę. Zwabiony owad pije słodki płyn, a przy okazji ociera się o pylniki, zbierając pyłek, który przeniesie na kolejny kwiat."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Która grupa dzikich pszczół buduje gniazda z wełnistych włosków zeskrobanych z liści roślin (np. czyśćca wełnistego)?",
+        options: ["Miesierki", "Makowatki", "Marek", "Makoszki (np. wełnista)"],
+        correct: 3,
+        info: "<b>💡 FISZKA #15 - Makoszka wełnista (Anthidium manicatum):</b> Samice tego gatunku zbierają owłosienie z roślin, tworząc puszyste, ciepłe norki dla jaj. Samce są terytorialne i potrafią odganiać inne owady od swoich kwiatów."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Jakie owady nazywane 'architektami' wycinają idealne kółka z liści róż i bzu, aby wyścielić nimi swoje gniazda?",
+        options: ["Miesierki (np. różanka)", "Korniki", "Gąsienice", "Mrówki"],
+        correct: 0,
+        info: "<b>💡 FISZKA #16 - Miesierka różanka (Megachile centuncularis):</b> Ta niezwykła dzika pszczoła używa wyciętych fragmentów liści jako tapety do swoich rurek gniazdowych. Wycięte kółka nie niszczą krzewów, a owad jest wspaniałym zapylaczem."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Dlaczego woda w ogrodzie (np. w postaci płytkiego poidełka z kamieniami) jest ważna dla owadów?",
+        options: ["Owady myją w niej skrzydła", "Służy im do picia i chłodzenia gniazd", "Owady w niej pływają", "Służy do produkcji miodu"],
+        correct: 1,
+        info: "<b>💡 FISZKA #17 - Poidełka dla owadów:</b> W upalne dni pszczoły i trzmiele potrzebują wody do picia oraz do termoregulacji (chłodzenia gniazda). Kamienie lub mech w poidełku zabezpieczają owady przed utonięciem."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Która dzika pszczółka samotnica gniazduje w pustych muszlach ślimaków, zaklejając wejście przeżutymi liśćmi?",
+        options: ["Murarka muszlowa", "Pszczolinka", "Osa murarka", "Kornikówka"],
+        correct: 0,
+        info: "<b>💡 FISZKA #18 - Murarka muszlowa (Osmia aurulenta):</b> To niesamowity przykład adaptacji. Samica wyszukuje pustą muszlę ślimaka (np. winniczka), składa w niej jaja, zaopatruje w pyłek, po czym maskuje muszlę ziemią i trawą."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Jak nazywa się kleisty, żółty pył produkowany przez kwiaty, który jest głównym źródłem białka dla rozwoju młodych pszczół?",
+        options: ["Pyłek kwiatowy", "Nektar", "Propolis", "Mleczko"],
+        correct: 0,
+        info: "<b>💡 FISZKA #19 - Rola pyłku:</b> O ile nektar to paliwo energetyczne (cukier), o tyle pyłek kwiatowy jest niezbędny jako źródło białka, tłuszczów i witamin. Bez pyłku larwy owadów nie byłyby w stanie urosnąć."
+    },
+    {
+        image: "https://unsplash.com",
+        q: "Który owad społeczny żyje w wielkich rojach, produkuje miód i jako jedyny posiada system tańców ułatwiający komunikację o pożywieniu?",
+        options: ["Pszczoła miodna", "Trzmiel rudy", "Szerszeń europejski", "Osa pospolita"],
+        correct: 0,
+        info: "<b>💡 FISZKA #20 - Pszczoła miodna (Apis mellifera):</b> Pszczoły robotnice za pomocą specjalnego tańca wywijanego na plastrze miodu potrafią przekazać całemu ulowi precyzyjny kierunek oraz odległość, w jakiej znajduje się bogate pole kwiatowe."
+    }
+];
+
+let currentIndex = 0;
+let score = 0;
+
+function startLearning() {
+    document.getElementById("start-screen").classList.add("hidden");
+    document.getElementById("learning-screen").classList.remove("hidden");
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const current = insectDatabase[currentIndex];
+    
+    document.getElementById("progress-text").innerText = `Owad ${currentIndex + 1} z ${insectDatabase.length}`;
+    const progressPercent = (currentIndex / insectDatabase.length) * 100;
+    document.getElementById("progress").style.width = `${progressPercent}%`;
+    
+    document.getElementById("main-image").src = current.image;
+    document.getElementById("fiszka").classList.add("hidden");
+    document.getElementById("next-btn").classList.add("hidden");
+    
+    const grid = document.getElementById("options-grid");
+    grid.innerHTML = "";
+    
+    current.options.forEach((name, index) => {
+        const tile = document.createElement("div");
+        tile.classList.add("option-tile");
+        tile.innerText = name;
+        tile.onclick = () => checkAnswer(index, tile);
+        grid.appendChild(tile);
+    });
+}
+
+function checkAnswer(selectedIndex, clickedTile) {
+    const current = insectDatabase[currentIndex];
+    const tiles = document.querySelectorAll(".option-tile");
+    
+    tiles.forEach(tile => tile.classList.add("disabled"));
+    
+    if (selectedIndex === current.correct) {
+        clickedTile.classList.add("correct");
+        score++;
+    } else {
+        clickedTile.classList.add("wrong");
+        tiles[current.correct].classList.add("correct");
+    }
+    
+    const fiszkaBox = document.getElementById("fiszka");
+    fiszkaBox.innerHTML = current.info;
+    fiszkaBox.classList.remove("hidden");
+    
+    document.getElementById("next-btn").classList.remove("hidden");
+}
+
+function nextQuestion() {
+    currentIndex++;
+    if (currentIndex < insectDatabase.length) {
+        loadQuestion();
+    } else {
+        document.getElementById("learning-screen").classList.add("hidden");
+        document.getElementById("end-screen").classList.remove("hidden");
+        document.getElementById("final-score").innerText = `${score} / ${insectDatabase.length}`;
+    }
+}
+</script>
+</body>
+</html>
